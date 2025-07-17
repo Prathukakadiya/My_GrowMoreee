@@ -7,17 +7,20 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
         Scanner sc = new Scanner(System.in);
         UserService userService = new UserService();
+        User user1 = new User();
         TradingService tradingService = new TradingService();
         DBConnection db = new DBConnection();
         StockService stockService = new StockService();
         UserValidation uv = new UserValidation();
         Connection con = db.getConnection();
+        ResultSet rs;
         while (true) {
             System.out.println("1. Register\n2. Login\n3.exit");
             int choice = sc.nextInt();
@@ -64,7 +67,7 @@ public class Main {
                     String q1 = "select Mail_id from users where Mail_id=?";
                     PreparedStatement pst = con.prepareStatement(q1);
                     pst.setString(1, email);
-                    ResultSet rs = pst.executeQuery();
+                    rs = pst.executeQuery();
                     if (!(rs.next())) {
                         System.out.println("Email not found");
                         System.out.println("Please Sign Up And Then Log In");
@@ -75,9 +78,9 @@ public class Main {
                         String q2 = "select password from users where Mail_id=?";
                         PreparedStatement pst2 = con.prepareStatement(q2);
                         pst2.setString(1, email);
-                        ResultSet rs2 = pst2.executeQuery();
-                        if ((rs2.next())) {
-                            String actualPass = rs2.getString("password");
+                        rs= pst2.executeQuery();
+                        if ((rs.next())) {
+                            String actualPass = rs.getString("password");
                             if (actualPass.equals(pass)) {
                                 System.out.println("Login successfully");
                                 while (true) {
@@ -87,7 +90,8 @@ public class Main {
                                     System.out.println("3. Portfolio");
                                     System.out.println("4. Transaction History");
                                     System.out.println("5. View All Logged-in Users");
-                                    System.out.println("6. Exit");
+                                    System.out.println("6. Add Funds");
+                                    System.out.println("7. Exit");
 
                                     int opt = sc.nextInt();
                                     sc.nextLine();
@@ -99,27 +103,45 @@ public class Main {
                                         case 2:
                                             System.out.print("Enter symbol: ");
                                             String sym = sc.nextLine();
-                                            System.out.print("Quantity: ");
-                                            int qty = sc.nextInt();
-                                            sc.nextLine();
-                                            if (tradingService.buyStock(user, sym, qty)) {
-                                                System.out.println("Success!");
-                                            } else {
-                                                System.out.println("Failed: insufficient funds or invalid stock.");
+                                            String q3 = "select Symbols from stocks where Symbols=?";
+                                            PreparedStatement pst3 = con.prepareStatement(q3);
+                                            pst3.setString(1, sym);
+                                            rs = pst3.executeQuery();
+                                            if (rs.next()) {
+                                                String actualsym = rs.getString("Symbols");
+                                                    String q4 = "{call details(?)}";
+                                                    CallableStatement cst = con.prepareCall(q4);
+                                                    cst.setString(1, sym);
+                                                    ResultSet rs2 = cst.executeQuery();
+                                                    if(rs2.next()) {
+                                                        String symbol = stockService.TableShow(rs2.getString(1), 12);
+                                                        String name = stockService.TableShow(rs2.getString(2), 15);
+                                                        String prev = "Previous Close: ₹" + rs2.getString(3);
+                                                        String open = "Today Open: ₹" + rs2.getString(4);
+
+                                                        System.out.println(symbol + name + prev + "     " + open);
+                                                    }
                                             }
-                                            break;
-                                        case 3:
-                                            user.showPortfolio();
-                                            break;
-                                        case 4:
-                                            user.transactionHistory.display();
-                                            break;
-                                        case 5:
-                                            userService.showAllUsers();
-                                            break;
-                                        case 6:
-                                            System.out.println("Bye!");
-                                            return;
+                                            else{
+                                                System.out.println("company not found");
+                                            }
+                                                break;
+                                                case 3:
+                                                    user.showPortfolio();
+                                                    break;
+                                                case 4:
+                                                    user.transactionHistory.display();
+                                                    break;
+                                                case 5:
+                                                    userService.showAllUsers();
+                                                    break;
+                                                case 6:
+                                                    user1.addFunds();
+                                                    System.out.println("funds addded");
+                                                    break;
+                                                case 7:
+                                                    System.out.println("Bye!");
+                                                    return;
                                     }
                                 }
                             } else {

@@ -36,7 +36,7 @@ public class StockService {
     }
 
     // ✅ Helper method added inside the class
-    private String TableShow(String str, int length) {
+    public String TableShow(String str, int length) {
         while (str.length() < length) {
             str += " ";
         }

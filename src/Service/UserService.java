@@ -23,31 +23,32 @@ public class UserService {
         return rows > 0;
     }
 
-    public User login(String username, String password) throws SQLException {
-        if (userMap.containsKey(username)) return userMap.get(username);
+//    public User login(String username, String password) throws SQLException {
+//        if (userMap.containsKey(username)) return userMap.get(username);
+//
+//        Connection con = DBConnection.getConnection();
+//        PreparedStatement ps = con.prepareStatement(
+//                "SELECT * FROM users WHERE username=? AND password=?"
+//        );
+//        ps.setString(1, username);
+//        ps.setString(2, password);
+//        ResultSet rs = ps.executeQuery();
+//
+//        if (rs.next()) {
+//            User user = new User(
+//                    rs.getInt("id"),
+//                    username,
+//                    password,
+//                    rs.getDouble("balance")
+//            );
+//            userMap.put(username, user);
+//            return user;
+//        }
+//
+//        con.close();
+//        return null;
+//    }
 
-        Connection con = DBConnection.getConnection();
-        PreparedStatement ps = con.prepareStatement(
-                "SELECT * FROM users WHERE username=? AND password=?"
-        );
-        ps.setString(1, username);
-        ps.setString(2, password);
-        ResultSet rs = ps.executeQuery();
-
-        if (rs.next()) {
-            User user = new User(
-                    rs.getInt("id"),
-                    username,
-                    password,
-                    rs.getDouble("balance")
-            );
-            userMap.put(username, user);
-            return user;
-        }
-
-        con.close();
-        return null;
-    }
 
     public void showAllUsers() {
         System.out.println("All Logged-in Users:");

@@ -38,7 +38,6 @@ public class TradingService {
 
             // Update memory
             user.balance -= total;
-            user.addStock(symbol, qty);
             user.transactionHistory.add(new Transaction(symbol, qty, stock.todayOpenPrice, new java.sql.Timestamp(System.currentTimeMillis()).toString()));
 
             return true;
