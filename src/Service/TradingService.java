@@ -11,7 +11,7 @@ public class TradingService {
         Stock stock = stockService.getStock(symbol);
         if (stock == null) return false;
 
-        double total = stock.price * qty;
+        double total = stock.todayOpenPrice * qty;
         if (user.balance < total) return false;
 
         Connection con = DBConnection.getConnection();
@@ -31,7 +31,7 @@ public class TradingService {
             insertTxn.setInt(1, user.id);
             insertTxn.setString(2, symbol);
             insertTxn.setInt(3, qty);
-            insertTxn.setDouble(4, stock.price);
+            insertTxn.setDouble(4, stock.todayOpenPrice);
             insertTxn.executeUpdate();
 
             con.commit();
@@ -39,7 +39,7 @@ public class TradingService {
             // Update memory
             user.balance -= total;
             user.addStock(symbol, qty);
-            user.transactionHistory.add(new Transaction(symbol, qty, stock.price, new java.sql.Timestamp(System.currentTimeMillis()).toString()));
+            user.transactionHistory.add(new Transaction(symbol, qty, stock.todayOpenPrice, new java.sql.Timestamp(System.currentTimeMillis()).toString()));
 
             return true;
         } catch (Exception e) {

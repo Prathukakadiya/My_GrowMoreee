@@ -1,3 +1,4 @@
+import Model.Stock;
 import Model.User;
 import Service.*;
 import DB.*;
@@ -17,7 +18,6 @@ public class Main {
         StockService stockService = new StockService();
         UserValidation uv = new UserValidation();
         Connection con = db.getConnection();
-        HashMap<String, String> MailPass = new HashMap<>();
         while (true) {
             System.out.println("1. Register\n2. Login\n3.exit");
             int choice = sc.nextInt();
@@ -32,8 +32,6 @@ public class Main {
                         return;
                     }
                     if (userService.register(uv.name, uv.password, uv.aadhar, uv.pan, uv.email)) {
-                        MailPass.put(uv.email, uv.password);
-                        //System.out.println(Mail);
                         System.out.println("Registered successfully.");
                     } else {
                         System.out.println("Username already exists.");
@@ -96,9 +94,7 @@ public class Main {
 
                                     switch (opt) {
                                         case 1:
-                                            for (var s : stockService.getAllStocks()) {
-                                                System.out.println(s.symbol + " - " + s.name + " - ₹" + s.price);
-                                            }
+                                            stockService.getAllStocks();
                                             break;
                                         case 2:
                                             System.out.print("Enter symbol: ");

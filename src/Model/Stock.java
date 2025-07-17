@@ -1,13 +1,15 @@
 package Model;
 
-public class Stock {
+public class  Stock {
     public String symbol;
     public String name;
-    public double price;
+    public double previousClosePrice;
+    public double todayOpenPrice;
 
-    public Stock(String symbol, String name, double price) {
+    public Stock(String symbol, String name, double previousClosePrice, double todayOpenPrice) {
         this.symbol = symbol;
         this.name = name;
-        this.price = price;
+        this.previousClosePrice = previousClosePrice;
+        this.todayOpenPrice = todayOpenPrice;
     }
 }
