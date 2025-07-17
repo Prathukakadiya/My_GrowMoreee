@@ -33,9 +33,8 @@ public class User {
             }
         }
     }
-    public void addFunds() {
+    public double addFunds() {
         Scanner sc = new Scanner(System.in);
-
         while (true) {
             try {
                 System.out.print("Enter amount to add (or type 'exit' to stop): ");
@@ -45,22 +44,18 @@ public class User {
                     System.out.println("Exiting fund addition. Final Balance: ₹" + balance);
                     break;
                 }
-
                 double funds = Double.parseDouble(input);
 
                 if (funds < 0) {
                     System.out.println("Error: Please enter a positive amount.");
                     continue; // loop again
                 }
-
-                balance += funds;
+                this.balance += funds;
                 System.out.println("Funds added successfully. New Balance: ₹" + balance);
             } catch (NumberFormatException e) {
                 System.out.println("Error: Please enter a valid number.");
-            } catch (Exception e) {
-                System.out.println("Unexpected error: " + e.getMessage());
             }
         }
+        return balance;
     }
-
 }

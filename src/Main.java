@@ -20,6 +20,11 @@ public class Main {
         StockService stockService = new StockService();
         UserValidation uv = new UserValidation();
         Connection con = db.getConnection();
+        int qty=0;
+        double prev_close=0;
+        double today_open=0;
+        double cur_price=0;
+        double bal=0;
         ResultSet rs;
         while (true) {
             System.out.println("1. Register\n2. Login\n3.exit");
@@ -116,11 +121,41 @@ public class Main {
                                                     if(rs2.next()) {
                                                         String symbol = stockService.TableShow(rs2.getString(1), 12);
                                                         String name = stockService.TableShow(rs2.getString(2), 15);
-                                                        String prev = "Previous Close: ₹" + rs2.getString(3);
-                                                        String open = "Today Open: ₹" + rs2.getString(4);
-
-                                                        System.out.println(symbol + name + prev + "     " + open);
+                                                        String prev = "Previous Close: Rs." + rs2.getString(3);
+                                                        String open = "Today Open: Rs." + rs2.getString(4);
+                                                        prev_close=rs2.getDouble(3);
+                                                        today_open=rs2.getDouble(4);
+                                                        cur_price = today_open * (1 + (Math.random() * 0.06 - 0.03));
+                                                        cur_price = Math.round(cur_price * 100.0) / 100.0;
+                                                        System.out.println(symbol + name + prev + "     " + open + "    Current Price: Rs."+cur_price);
                                                     }
+                                                bal=user1.balance;
+                                                System.out.println("balance = "+bal);
+                                                int maxShares=(int)(bal/cur_price);
+                                                System.out.println("maxshare = "+maxShares);
+                                                    if(maxShares==0){
+                                                        System.out.println("Add sufficient Balance");
+                                                        break;
+                                                    }
+                                                System.out.println("you can buy maximum "+maxShares+" shares");
+                                                while (true) {
+                                                    try {
+                                                        System.out.print("Enter Quantity: ");
+                                                        qty = sc.nextInt();
+                                                        if (qty <= 0) {
+                                                            System.out.println("Please enter a positive quantity.");
+                                                            continue;
+                                                        }
+                                                        if(maxShares<qty){
+                                                            System.out.println("you can buy maximum "+maxShares+" shares");
+                                                            continue;
+                                                        }
+                                                        break;
+                                                    } catch (InputMismatchException e) {
+                                                        System.out.println("Invalid input. Please enter a valid quantity (numbers only).");
+                                                        sc.next();
+                                                    }
+                                                }
                                             }
                                             else{
                                                 System.out.println("company not found");
