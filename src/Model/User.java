@@ -9,6 +9,7 @@ public class User {
     public String username;
     public String password;
     public double balance;
+    public String email;
     public HashMap<String, Integer> portfolio = new HashMap<>();
     public CustomLinkedList transactionHistory = new CustomLinkedList();
 

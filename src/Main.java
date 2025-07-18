@@ -21,11 +21,12 @@ public class Main {
         UserValidation uv = new UserValidation();
         Connection con = db.getConnection();
         int qty=0;
+        ResultSet rs;
         double prev_close=0;
         double today_open=0;
         double cur_price=0;
         double bal=0;
-        ResultSet rs;
+        //double bal =0;
         while (true) {
             System.out.println("1. Register\n2. Login\n3.exit");
             int choice = sc.nextInt();
@@ -47,15 +48,15 @@ public class Main {
                     }
                     break;
                 case 2:
-                    String email;
+                    //String email;
                     boolean isValidmail;
                     do {
                         System.out.print("Enter your E-mail id: ");
-                        email = sc.nextLine();
+                        user1.email = sc.nextLine();
                         isValidmail = true;
-                        if (email.length() > 10 && email.endsWith("@gmail.com")) {
-                            for (int j = 0; j < email.length() - 10; j++) {
-                                char e = email.charAt(j);
+                        if (user1.email.length() > 10 && user1.email.endsWith("@gmail.com")) {
+                            for (int j = 0; j < user1.email.length() - 10; j++) {
+                                char e = user1.email.charAt(j);
                                 if (!((e >= 'a' && e <= 'z') || (e >= 'A' && e <= 'Z') || (e >= '0' && e <= '9') || e == '.' || e == '_')) {
                                     isValidmail = false;
                                     break;
@@ -71,7 +72,7 @@ public class Main {
                     } while (!isValidmail);
                     String q1 = "select Mail_id from users where Mail_id=?";
                     PreparedStatement pst = con.prepareStatement(q1);
-                    pst.setString(1, email);
+                    pst.setString(1, user1.email);
                     rs = pst.executeQuery();
                     if (!(rs.next())) {
                         System.out.println("Email not found");
@@ -82,7 +83,7 @@ public class Main {
                         String pass = sc.next();
                         String q2 = "select password from users where Mail_id=?";
                         PreparedStatement pst2 = con.prepareStatement(q2);
-                        pst2.setString(1, email);
+                        pst2.setString(1, user1.email);
                         rs= pst2.executeQuery();
                         if ((rs.next())) {
                             String actualPass = rs.getString("password");
@@ -129,10 +130,15 @@ public class Main {
                                                         cur_price = Math.round(cur_price * 100.0) / 100.0;
                                                         System.out.println(symbol + name + prev + "     " + open + "    Current Price: Rs."+cur_price);
                                                     }
-                                                bal=user1.balance;
+                                                String sql = "SELECT Balance FROM users WHERE Mail_id = ?";
+                                                PreparedStatement pstt = con.prepareStatement(sql);
+                                                pstt.setString(1, user1.email);  // Or any email you want to query
+                                                rs = pstt.executeQuery();
+                                                if (rs.next()) {
+                                                    bal = rs.getDouble("Balance");
+                                                }
                                                 System.out.println("balance = "+bal);
                                                 int maxShares=(int)(bal/cur_price);
-                                                System.out.println("maxshare = "+maxShares);
                                                     if(maxShares==0){
                                                         System.out.println("Add sufficient Balance");
                                                         break;
@@ -156,6 +162,14 @@ public class Main {
                                                         sc.next();
                                                     }
                                                 }
+                                                bal = Math.floor((bal - cur_price * qty) * 100) / 100;
+                                                System.out.println("Your Balance is: "+bal);
+                                                String sql1 = "UPDATE users SET balance = ? WHERE Mail_id = ?";
+                                                PreparedStatement pst5 = con.prepareStatement(sql1);
+                                                pst5.setDouble(1, bal);  // Set the balance
+                                                pst5.setString(2, user1.email);
+                                                int rows = pst5.executeUpdate();
+
                                             }
                                             else{
                                                 System.out.println("company not found");
@@ -173,6 +187,12 @@ public class Main {
                                                 case 6:
                                                     user1.addFunds();
                                                     System.out.println("funds addded");
+                                                    bal=bal+=user1.balance;
+                                                    String sql1 = "UPDATE users SET balance = ? WHERE Mail_id = ?";
+                                                    PreparedStatement pst5 = con.prepareStatement(sql1);
+                                                    pst5.setDouble(1, bal);  // Set the balance
+                                                    pst5.setString(2, user1.email);
+                                                    int rows = pst5.executeUpdate();
                                                     break;
                                                 case 7:
                                                     System.out.println("Bye!");
