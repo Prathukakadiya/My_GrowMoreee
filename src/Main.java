@@ -11,12 +11,13 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
         UserService userService = new UserService();
         User user1 = new User();
         TradingService tradingService = new TradingService();
         DBConnection db = new DBConnection();
+        DBQueries dbq=new DBQueries();
         StockService stockService = new StockService();
         UserValidation uv = new UserValidation();
         Connection con = db.getConnection();
@@ -109,27 +110,8 @@ public class Main {
                                         case 2:
                                             System.out.print("Enter symbol: ");
                                             String sym = sc.nextLine();
-                                            String q3 = "select Symbols from stocks where Symbols=?";
-                                            PreparedStatement pst3 = con.prepareStatement(q3);
-                                            pst3.setString(1, sym);
-                                            rs = pst3.executeQuery();
-                                            if (rs.next()) {
-                                                String actualsym = rs.getString("Symbols");
-                                                    String q4 = "{call details(?)}";
-                                                    CallableStatement cst = con.prepareCall(q4);
-                                                    cst.setString(1, sym);
-                                                    ResultSet rs2 = cst.executeQuery();
-                                                    if(rs2.next()) {
-                                                        String symbol = stockService.TableShow(rs2.getString(1), 12);
-                                                        String name = stockService.TableShow(rs2.getString(2), 15);
-                                                        String prev = "Previous Close: Rs." + rs2.getString(3);
-                                                        String open = "Today Open: Rs." + rs2.getString(4);
-                                                        prev_close=rs2.getDouble(3);
-                                                        today_open=rs2.getDouble(4);
-                                                        cur_price = today_open * (1 + (Math.random() * 0.06 - 0.03));
-                                                        cur_price = Math.round(cur_price * 100.0) / 100.0;
-                                                        System.out.println(symbol + name + prev + "     " + open + "    Current Price: Rs."+cur_price);
-                                                    }
+                                            String s=dbq.getSharesDetail(sym);
+                                            System.out.println(s);
                                                 String sql = "SELECT Balance FROM users WHERE Mail_id = ?";
                                                 PreparedStatement pstt = con.prepareStatement(sql);
                                                 pstt.setString(1, user1.email);  // Or any email you want to query
@@ -138,11 +120,12 @@ public class Main {
                                                     bal = rs.getDouble("Balance");
                                                 }
                                                 System.out.println("balance = "+bal);
+                                                cur_price = dbq.getCurPrice();
                                                 int maxShares=(int)(bal/cur_price);
-                                                    if(maxShares==0){
-                                                        System.out.println("Add sufficient Balance");
-                                                        break;
-                                                    }
+                                                if(maxShares==0){
+                                                    System.out.println("Add sufficient Balance");
+                                                    break;
+                                                }
                                                 System.out.println("you can buy maximum "+maxShares+" shares");
                                                 while (true) {
                                                     try {
@@ -170,33 +153,37 @@ public class Main {
                                                 pst5.setString(2, user1.email);
                                                 int rows = pst5.executeUpdate();
 
+                                            break;
+                                        case 3:
+                                            user.showPortfolio();
+                                            break;
+                                        case 4:
+                                            user.transactionHistory.display();
+                                            break;
+                                        case 5:
+                                            userService.showAllUsers();
+                                            break;
+                                        case 6:
+                                            user1.addFunds();
+                                            System.out.println("funds addded");
+                                            sql = "SELECT Balance FROM users WHERE Mail_id = ?";
+                                            pstt = con.prepareStatement(sql);
+                                            pstt.setString(1, user1.email);  // Or any email you want to query
+                                            rs = pstt.executeQuery();
+                                            if (rs.next()) {
+                                                bal = rs.getDouble("Balance");
                                             }
-                                            else{
-                                                System.out.println("company not found");
-                                            }
-                                                break;
-                                                case 3:
-                                                    user.showPortfolio();
-                                                    break;
-                                                case 4:
-                                                    user.transactionHistory.display();
-                                                    break;
-                                                case 5:
-                                                    userService.showAllUsers();
-                                                    break;
-                                                case 6:
-                                                    user1.addFunds();
-                                                    System.out.println("funds addded");
-                                                    bal=bal+=user1.balance;
-                                                    String sql1 = "UPDATE users SET balance = ? WHERE Mail_id = ?";
-                                                    PreparedStatement pst5 = con.prepareStatement(sql1);
-                                                    pst5.setDouble(1, bal);  // Set the balance
-                                                    pst5.setString(2, user1.email);
-                                                    int rows = pst5.executeUpdate();
-                                                    break;
-                                                case 7:
-                                                    System.out.println("Bye!");
-                                                    return;
+                                            bal=bal+user1.balance;
+                                            sql1 = "UPDATE users SET balance = ? WHERE Mail_id = ?";
+                                            pst5 = con.prepareStatement(sql1);
+                                            pst5.setDouble(1, bal);  // Set the balance
+                                            pst5.setString(2, user1.email);
+                                            rows = pst5.executeUpdate();
+                                            System.out.println("Your balance is = "+bal);
+                                            break;
+                                        case 7:
+                                            System.out.println("Bye!");
+                                            return;
                                     }
                                 }
                             } else {

@@ -42,7 +42,6 @@ public class User {
                 String input = sc.nextLine();
 
                 if (input.equalsIgnoreCase("exit")) {
-                    System.out.println("Exiting fund addition. Final Balance: ₹" + balance);
                     break;
                 }
                 double funds = Double.parseDouble(input);
@@ -51,8 +50,7 @@ public class User {
                     System.out.println("Error: Please enter a positive amount.");
                     continue; // loop again
                 }
-                this.balance += funds;
-                System.out.println("Funds added successfully. New Balance: ₹" + balance);
+                this.balance =this.balance+ funds;
             } catch (NumberFormatException e) {
                 System.out.println("Error: Please enter a valid number.");
             }
