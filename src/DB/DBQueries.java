@@ -34,10 +34,23 @@ public class DBQueries {
                 cur_price = Math.round(cur_price * 100.0) / 100.0;
                 detail=(symbol + name +"   "+ prev + "     " + open + "    Current Price: Rs."+cur_price);
             }
+            return detail;
         }
         else{
             System.out.println("Company not found!!");
+            return null;
         }
-        return detail;
+    }
+    public void dbtransaction(String mail, String symbol, int qty, double price) throws SQLException {
+        Connection con = DBConnection.getConnection();
+        Timestamp time = new Timestamp(System.currentTimeMillis());
+        String sql = "INSERT INTO transactions (Mail_id, Symbol, Quantity, Price, Timestamp) VALUES (?, ?, ?, ?, ?)";
+        PreparedStatement pst = con.prepareStatement(sql);
+        pst.setString(1, mail);
+        pst.setString(2, symbol);
+        pst.setInt(3, qty);
+        pst.setDouble(4, price);
+        pst.setTimestamp(5, time);
+        pst.executeUpdate();
     }
 }

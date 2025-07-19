@@ -30,8 +30,18 @@ public class Main {
         //double bal =0;
         while (true) {
             System.out.println("1. Register\n2. Login\n3.exit");
-            int choice = sc.nextInt();
-            sc.nextLine();
+            int choice = 0;
+            while (true) {
+                try {
+                    System.out.print("Enter your option: ");
+                    choice = sc.nextInt();
+                    sc.nextLine(); // Consume newline after int
+                    break; // Exit loop if input is valid
+                } catch (InputMismatchException e) {
+                    System.out.println("Invalid input. Please enter a valid integer.");
+                    sc.nextLine(); // Clear the invalid input
+                }
+            }
             User user = null;
 
             switch (choice) {
@@ -99,9 +109,18 @@ public class Main {
                                     System.out.println("5. View All Logged-in Users");
                                     System.out.println("6. Add Funds");
                                     System.out.println("7. Exit");
-
-                                    int opt = sc.nextInt();
-                                    sc.nextLine();
+                                    int opt = 0;
+                                    while (true) {
+                                        try {
+                                            System.out.print("Enter your option: ");
+                                            opt = sc.nextInt();
+                                            sc.nextLine();
+                                            break;
+                                        } catch (InputMismatchException e) {
+                                            System.out.println("Invalid input. Please enter a valid integer.");
+                                            sc.nextLine();
+                                        }
+                                    }
 
                                     switch (opt) {
                                         case 1:
@@ -111,6 +130,9 @@ public class Main {
                                             System.out.print("Enter symbol: ");
                                             String sym = sc.nextLine();
                                             String s=dbq.getSharesDetail(sym);
+                                            if(s==null){
+                                                break;
+                                            }
                                             System.out.println(s);
                                                 String sql = "SELECT Balance FROM users WHERE Mail_id = ?";
                                                 PreparedStatement pstt = con.prepareStatement(sql);
@@ -151,8 +173,8 @@ public class Main {
                                                 PreparedStatement pst5 = con.prepareStatement(sql1);
                                                 pst5.setDouble(1, bal);  // Set the balance
                                                 pst5.setString(2, user1.email);
-                                                int rows = pst5.executeUpdate();
-
+                                                pst5.executeUpdate();
+                                                dbq.dbtransaction(user1.email,sym, qty,cur_price);
                                             break;
                                         case 3:
                                             user.showPortfolio();
@@ -164,8 +186,8 @@ public class Main {
                                             userService.showAllUsers();
                                             break;
                                         case 6:
-                                            user1.addFunds();
-                                            System.out.println("funds addded");
+                                            double fund=user1.addFunds();
+                                            System.out.println("funds added");
                                             sql = "SELECT Balance FROM users WHERE Mail_id = ?";
                                             pstt = con.prepareStatement(sql);
                                             pstt.setString(1, user1.email);  // Or any email you want to query
@@ -173,12 +195,13 @@ public class Main {
                                             if (rs.next()) {
                                                 bal = rs.getDouble("Balance");
                                             }
-                                            bal=bal+user1.balance;
+                                            bal=bal+fund;
+                                            bal=(bal*100)/100;
                                             sql1 = "UPDATE users SET balance = ? WHERE Mail_id = ?";
                                             pst5 = con.prepareStatement(sql1);
                                             pst5.setDouble(1, bal);  // Set the balance
                                             pst5.setString(2, user1.email);
-                                            rows = pst5.executeUpdate();
+                                            pst5.executeUpdate();
                                             System.out.println("Your balance is = "+bal);
                                             break;
                                         case 7:
