@@ -1,4 +1,5 @@
 import Model.User;
+import Model.User.*;
 import Service.*;
 import DB.*;
 import java.sql.*;
@@ -131,7 +132,6 @@ public class Main {
                                             }
                                             System.out.println("balance = " + bal);
                                             cur_price = dbq.getCurPrice();
-                                            System.out.println("curr ="+cur_price);
                                             int maxShares = (int) (bal / cur_price);
                                             if (maxShares == 0) {
                                                 System.out.println("Add sufficient Balance");
@@ -164,11 +164,14 @@ public class Main {
                                             pst5.setString(2, user.email);
                                             pst5.executeUpdate();
                                             dbq.dbtransaction(user.email, sym, qty, cur_price,"BUY");
-
                                             break;
                                         case 3:
                                             System.out.println("your portFolio is");
                                             user.showPortfolio(user.email);
+                                            if(User.SymQty.isEmpty()){
+                                                System.out.println("No Data Available");
+                                                break;
+                                            }
                                             System.out.println();
                                             System.out.println("Enter Symbol for sell shares");
                                             String SymSell=sc.nextLine();
@@ -179,9 +182,10 @@ public class Main {
                                             }
                                             dbq.getSharesDetail(SymSell);
                                             cur_price= dbq.getCurPrice();
+                                            double avgPrice=User.SymPrice.get(SymSell);
                                             System.out.println("---------------------------------------------");
                                             System.out.println("Company : "+SymSell);
-                                            System.out.println("Avg. price : "+User.SymPrice.get(SymSell));
+                                            System.out.println("Avg. price : "+avgPrice);
                                             System.out.println("Current price : "+cur_price);
                                             System.out.println("---------------------------------------------");
 
@@ -221,9 +225,20 @@ public class Main {
                                             pst05.executeUpdate();
                                             dbq.dbtransaction(user.email, SymSell, sellqty, cur_price,"SELL");
                                             System.out.println("Transaction completed");
+                                            if(cur_price>avgPrice){
+                                                double profit=(cur_price-avgPrice)*sellqty;
+                                                System.out.println("You make Profit of "+profit+" Rs.");
+                                            }
+                                            else{
+                                                double loss=(avgPrice-cur_price)*sellqty;
+                                                System.out.println("You make Loss of "+loss+" Rs.");
+                                            }
                                             break;
                                         case 4:
                                             user.showPortfolio(user.email);
+                                            if(User.SymQty.isEmpty()){
+                                                System.out.println("No data available");
+                                            }
                                             break;
                                         case 5:
                                             dbq.transactionHistory(user.email);

@@ -1,4 +1,6 @@
 package Model;
+import Service.StockService;
+import Service.StockService.*;
 import DB.*;
 import java.sql.*;
 import java.util.HashMap;
@@ -10,11 +12,9 @@ public class User {
     public String email;
     public static HashMap<String,Integer> SymQty=new HashMap<>();
     public static HashMap<String,Double> SymPrice=new HashMap<>();
-
+    StockService st=new StockService();
     public void showPortfolio(String mail) throws SQLException {
         Connection con = DBConnection.getConnection();
-
-        // Get current balance
         String balanceQuery = "SELECT Balance FROM users WHERE Mail_id = ?";
         PreparedStatement pstBalance = con.prepareStatement(balanceQuery);
         pstBalance.setString(1, mail);
@@ -26,15 +26,12 @@ public class User {
         }
         System.out.println("Current Balance: ₹" + balance);
         System.out.println("-----------------------------------------------------------------");
-
-        // Fetch all transactions for user
         String portfolioQuery = " SELECT Symbol, Action, Quantity, Price FROM transactions WHERE Mail_id = ? ORDER BY Symbol, Mail_id";
 
         PreparedStatement pstPortfolio = con.prepareStatement(portfolioQuery);
         pstPortfolio.setString(1, mail);
         ResultSet rs = pstPortfolio.executeQuery();
 
-        // Map to store quantities and buy/sell amounts
         Map<String, Integer> qtyMap = new HashMap<>();
         Map<String, Double> buyMap = new HashMap<>();
         Map<String, Double> sellMap = new HashMap<>();
@@ -67,9 +64,8 @@ public class User {
         System.out.printf("%-15s %-15s %-20s %-20s%n", "Company", "Total Qty", "Avg. Price", "Invested Amount");
         System.out.println("-----------------------------------------------------------------");
 
-        User.SymQty.clear();
-        User.SymPrice.clear();
-
+        SymQty.clear();
+        SymPrice.clear();
         for (String sym : qtyMap.keySet()) {
             int totalQty = qtyMap.get(sym);
             if (totalQty <= 0) continue;  // Sold out, skip
@@ -77,37 +73,44 @@ public class User {
             double totalBuy = buyMap.getOrDefault(sym, 0.0);
             double totalSell = sellMap.getOrDefault(sym, 0.0);
             double invested = totalBuy - totalSell;
+            invested = Math.round(invested * 100) / 100.0;
 
             double avgPrice = invested / totalQty;
-            avgPrice = Math.floor(avgPrice * 100) / 100.0;
+            avgPrice = Math.round(avgPrice * 100) / 100.0;
 
             // Store for later use (e.g. in sell)
-            User.SymQty.put(sym, totalQty);
-            User.SymPrice.put(sym, avgPrice);
+            SymQty.put(sym, totalQty);
+            SymPrice.put(sym, avgPrice);
 
-            System.out.printf("%-15s %-15d ₹%-20.2f ₹%-20.2f%n", sym, totalQty, avgPrice, invested);
+            System.out.println(
+                    st.TableShow(sym, 15) +
+                            st.TableShow(String.valueOf(totalQty), 15) +
+                            st.TableShow("Rs." + avgPrice, 20) +
+                            st.TableShow("Rs." +  invested, 20)
+            );
         }
     }
 
     public double addFunds() {
         Scanner sc = new Scanner(System.in);
+        double funds = 0;
+
         while (true) {
             try {
-                System.out.print("Enter amount to add (or type 'exit' to stop): ");
-                String input = sc.nextLine();
-                if (input.equalsIgnoreCase("exit")) {
-                    break;
-                }
-                double funds = Double.parseDouble(input);
+                System.out.print("Enter amount to add: ");
+                funds = sc.nextDouble();
                 if (funds < 0) {
                     System.out.println("Error: Please enter a positive amount.");
-                    continue; // loop again
+                    continue;
                 }
-                this.balance =this.balance+ funds;
-            } catch (NumberFormatException e) {
+                break;
+
+            } catch (InputMismatchException e) {
                 System.out.println("Error: Please enter a valid number.");
+                sc.nextLine(); // Clear invalid input
             }
         }
-        return balance;
+
+        return funds;
     }
 }

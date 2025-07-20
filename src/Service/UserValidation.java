@@ -125,7 +125,7 @@ public class UserValidation {
         boolean mailvalidate=true;
         while(mailvalidate) {
             System.out.print("Enter your E-mail id: ");
-            String email= sc.nextLine();
+            email= sc.nextLine();
             String mail = validMail(email);
             if (mail == null) {
                 System.out.println("Enter Valid Email");
@@ -150,8 +150,6 @@ public class UserValidation {
     public String validMail(String email){
         boolean isValidmail;
         do {
-            System.out.print("Enter your E-mail id: ");
-            email = sc.nextLine();
             isValidmail = true;
             if (email.length() > 10 && email.endsWith("@gmail.com")) {
                 for (int j = 0; j < email.length() - 10; j++) {
@@ -164,7 +162,6 @@ public class UserValidation {
             } else {
                 isValidmail = false;
             }
-
             if (!isValidmail) {
                 return null;
             }
