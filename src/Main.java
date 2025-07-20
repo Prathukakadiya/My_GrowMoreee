@@ -1,5 +1,4 @@
 import Model.User;
-import Model.User.*;
 import Service.*;
 import DB.*;
 import java.sql.*;
@@ -15,6 +14,7 @@ public class Main {
         StockService stockService = new StockService();
         UserValidation uv = new UserValidation();
         Connection con = db.getConnection();
+        Timestamp time = new Timestamp(System.currentTimeMillis());
         int qty=0;
         ResultSet rs;
         double cur_price=0;
@@ -131,6 +131,7 @@ public class Main {
                                             }
                                             System.out.println("balance = " + bal);
                                             cur_price = dbq.getCurPrice();
+                                            System.out.println("curr ="+cur_price);
                                             int maxShares = (int) (bal / cur_price);
                                             if (maxShares == 0) {
                                                 System.out.println("Add sufficient Balance");
@@ -163,6 +164,7 @@ public class Main {
                                             pst5.setString(2, user.email);
                                             pst5.executeUpdate();
                                             dbq.dbtransaction(user.email, sym, qty, cur_price,"BUY");
+
                                             break;
                                         case 3:
                                             System.out.println("your portFolio is");
@@ -172,9 +174,23 @@ public class Main {
                                             String SymSell=sc.nextLine();
 
                                             if(!(User.SymQty.containsKey(SymSell))){
-                                                System.out.println("No shares Available");
+                                                System.out.println("No shares Available of this Company");
                                                 break;
                                             }
+                                            dbq.getSharesDetail(SymSell);
+                                            cur_price= dbq.getCurPrice();
+                                            System.out.println("---------------------------------------------");
+                                            System.out.println("Company : "+SymSell);
+                                            System.out.println("Avg. price : "+User.SymPrice.get(SymSell));
+                                            System.out.println("Current price : "+cur_price);
+                                            System.out.println("---------------------------------------------");
+
+                                            System.out.println("if you want to sell, then Enter Y/y otherwise N/n");
+                                            String ch=sc.next();
+                                            if(ch.equalsIgnoreCase("N")){
+                                                break;
+                                            }
+
                                             int QtySell=User.SymQty.get(SymSell);
                                             int sellqty = 0;
                                             while (true) {
@@ -196,13 +212,21 @@ public class Main {
                                                 System.out.println("you can sell maximum " + QtySell + " shares");
                                                 break;
                                             }
-
+                                            double sellAmount=cur_price*sellqty;
+                                            bal=bal+sellAmount;
+                                            String sql01 = "UPDATE users SET balance = ? WHERE Mail_id = ?";
+                                            PreparedStatement pst05 = con.prepareStatement(sql01);
+                                            pst05.setDouble(1, bal);  // Set the balance
+                                            pst05.setString(2, user.email);
+                                            pst05.executeUpdate();
+                                            dbq.dbtransaction(user.email, SymSell, sellqty, cur_price,"SELL");
+                                            System.out.println("Transaction completed");
                                             break;
                                         case 4:
                                             user.showPortfolio(user.email);
                                             break;
                                         case 5:
-                                            user.transactionHistory.display();
+                                            dbq.transactionHistory(user.email);
                                             break;
                                         case 6:
                                             double fund = user.addFunds();
