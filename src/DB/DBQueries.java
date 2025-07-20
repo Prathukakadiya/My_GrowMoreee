@@ -41,16 +41,17 @@ public class DBQueries {
             return null;
         }
     }
-    public void dbtransaction(String mail, String symbol, int qty, double price) throws SQLException {
+    public void dbtransaction(String mail, String symbol, int qty, double price, String buysell) throws SQLException {
         Connection con = DBConnection.getConnection();
         Timestamp time = new Timestamp(System.currentTimeMillis());
-        String sql = "INSERT INTO transactions (Mail_id, Symbol, Quantity, Price, Timestamp) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO transactions (Mail_id, Symbol, Quantity, Price, Action, Timestamp) VALUES (?, ?, ?, ?, ?, ?)";
         PreparedStatement pst = con.prepareStatement(sql);
         pst.setString(1, mail);
         pst.setString(2, symbol);
         pst.setInt(3, qty);
         pst.setDouble(4, price);
-        pst.setTimestamp(5, time);
+        pst.setString(5,buysell);
+        pst.setTimestamp(6, time);
         pst.executeUpdate();
     }
 }
