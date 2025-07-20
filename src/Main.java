@@ -169,39 +169,6 @@ public class Main {
                                             Map<String, Integer> buyMap = new HashMap<>();
                                             Map<String, Integer> sellMap = new HashMap<>();
 
-                                            String sql01 = "SELECT Symbol, Action, SUM(Quantity) AS TotalQty " +
-                                                    "FROM transactions WHERE Mail_id = ? GROUP BY Symbol, Action";
-
-                                            PreparedStatement pst01 = con.prepareStatement(sql01);
-                                            pst01.setString(1, user.email);
-                                            ResultSet rs01 = pst01.executeQuery();
-
-                                            while (rs01.next()) {
-                                                String symbol = rs01.getString("Symbol");
-                                                String action = rs01.getString("Action");
-                                                int qty01 = rs01.getInt("TotalQty");
-
-                                                if (action.equalsIgnoreCase("BUY")) {
-                                                    buyMap.put(symbol, qty01);
-                                                } else if (action.equalsIgnoreCase("SELL")) {
-                                                    sellMap.put(symbol, qty01);
-                                                }
-                                            }
-                                            for (String symbol : buyMap.keySet()) {
-                                                int bought = buyMap.getOrDefault(symbol, 0);
-                                                int sold = sellMap.getOrDefault(symbol, 0);
-                                                if (bought - sold > 0) {
-                                                    symbols.add(symbol);
-                                                }
-                                            }
-                                            if (symbols.isEmpty()) {
-                                                System.out.println("You do not hold any stocks currently.");
-                                            } else {
-                                                System.out.println("Stocks you currently hold:");
-                                                for (String symbol : symbols) {
-                                                    System.out.println("- " + symbol);
-                                                }
-                                            }
 
                                             break;
                                         case 4:
