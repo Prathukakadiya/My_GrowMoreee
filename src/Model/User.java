@@ -8,12 +8,11 @@ import java.util.*;
 
 public class User {
     public int id;
-    public String username;
-    public String password;
     public double balance;
     public String email;
-    public HashMap<String, Integer> portfolio = new HashMap<>();
+    //public HashMap<String, Integer> portfolio = new HashMap<>();
     public CustomLinkedList transactionHistory = new CustomLinkedList();
+    public static HashMap<String,Integer> SymQty=new HashMap<>();
 
    public void showPortfolio(String mail) throws SQLException {
        Connection con=DBConnection.getConnection();
@@ -27,10 +26,8 @@ public class User {
        if (rsBal.next()) {
            balance = rsBal.getDouble("Balance");
        }
-
-       System.out.println("User Mail: " + mail);
        System.out.println("Current Balance: ₹" + balance);
-       System.out.println("--------------------------------------------------");
+       System.out.println("-----------------------------------------------------------------");
 
        // Step 2: Get portfolio (grouped by company)
        String portfolioQuery = "SELECT Symbol, SUM(Quantity) AS TotalQty, SUM(Quantity * Price) AS InvestedAmount FROM transactions WHERE Mail_id = ? AND Action = 'BUY' GROUP BY Symbol";
@@ -38,15 +35,16 @@ public class User {
        pstPortfolio.setString(1, mail);
        ResultSet rs = pstPortfolio.executeQuery();
 
-       System.out.printf("%-15s %-15s %-20s%n", "Company", "Total Qty", "Invested Amount");
-       System.out.println("--------------------------------------------------");
+       System.out.printf("%-15s %-15s %-20s %-20s%n", "Company", "Total Qty","Avg. Price", "Invested Amount");
+       System.out.println("-----------------------------------------------------------------");
 
        while (rs.next()) {
            String symbol = rs.getString("Symbol");
            int totalQty = rs.getInt("TotalQty");
            double invested = rs.getDouble("InvestedAmount");
-
-           System.out.printf("%-15s %-15d ₹%-20.2f%n", symbol, totalQty, invested);
+           double avgprice=invested/totalQty;
+           SymQty.put(symbol,totalQty);
+           System.out.printf("%-15s %-15d ₹%-20.2f ₹%-20.2f%n", symbol, totalQty, avgprice, invested);
        }
    }
     public double addFunds() {

@@ -1,4 +1,5 @@
 import Model.User;
+import Model.User.*;
 import Service.*;
 import DB.*;
 import java.sql.*;
@@ -32,7 +33,6 @@ public class Main {
                     sc.nextLine();
                 }
             }
-
             switch (choice) {
                 case 1:
                     uv.UserInput();
@@ -165,10 +165,37 @@ public class Main {
                                             dbq.dbtransaction(user.email, sym, qty, cur_price,"BUY");
                                             break;
                                         case 3:
-                                            Set<String> symbols = new HashSet<>();
-                                            Map<String, Integer> buyMap = new HashMap<>();
-                                            Map<String, Integer> sellMap = new HashMap<>();
+                                            System.out.println("your portFolio is");
+                                            user.showPortfolio(user.email);
+                                            System.out.println();
+                                            System.out.println("Enter Symbol for sell shares");
+                                            String SymSell=sc.nextLine();
 
+                                            if(!(User.SymQty.containsKey(SymSell))){
+                                                System.out.println("No shares Available");
+                                                break;
+                                            }
+                                            int QtySell=User.SymQty.get(SymSell);
+                                            int sellqty = 0;
+                                            while (true) {
+                                                try {
+                                                    System.out.print("Enter quantity: ");
+                                                    System.out.println("You have "+QtySell+" shares of "+SymSell);
+                                                    sellqty = sc.nextInt();
+                                                    if (sellqty <= 0) {
+                                                        System.out.println("Quantity must be greater than 0. Try again.");
+                                                    } else {
+                                                        break;
+                                                    }
+                                                } catch (InputMismatchException e) {
+                                                    System.out.println("Invalid input. Please enter a valid integer.");
+                                                    sc.nextLine();
+                                                }
+                                            }
+                                            if(sellqty>QtySell){
+                                                System.out.println("you can sell maximum " + QtySell + " shares");
+                                                break;
+                                            }
 
                                             break;
                                         case 4:
