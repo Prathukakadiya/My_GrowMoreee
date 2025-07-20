@@ -235,6 +235,7 @@ public class Main {
                                             }
                                             break;
                                         case 4:
+
                                             user.showPortfolio(user.email);
                                             if(User.SymQty.isEmpty()){
                                                 System.out.println("No data available");
