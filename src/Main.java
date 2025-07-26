@@ -7,6 +7,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+        System.out.println("----- Welcome To GrowMore------");
         Scanner sc = new Scanner(System.in);
         UserService userService = new UserService();
         User user = new User();

@@ -30,12 +30,9 @@ public class StockService {
 
             System.out.println(symbol + name + prev + "   |   " + open);
         }
-
-        con.close();
         return list;
     }
 
-    // ✅ Helper method added inside the class
     public String TableShow(String str, int length) {
         while (str.length() < length) {
             str += " ";
