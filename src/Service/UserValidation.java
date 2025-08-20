@@ -1,11 +1,16 @@
 package Service;
+import DB.DBConnection;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Scanner;
 
 public class UserValidation {
-
+    // Validation
     public String name;
     public String dob;
     public String aadhar;
@@ -16,7 +21,7 @@ public class UserValidation {
 
     static Scanner sc = new Scanner(System.in);
 
-    public void UserInput() {
+    public void UserInput() throws SQLException {
         // Name
         boolean validname;
         do {
@@ -25,15 +30,26 @@ public class UserValidation {
             validname = true;
 
             if (name.length() == 0) {
-                System.out.println("Invalid Name");
+                System.out.println("NOTICE : Invalid Name");
                 validname = false;
             }
 
             for (int i = 0; i < name.length(); i++) {
                 char c = name.charAt(i);
                 if (!Character.isLetter(c)) {
-                    System.out.println("Invalid Name: Only alphabets allowed");
+                    System.out.println("NOTICE : Invalid Name: Only alphabets allowed");
                     validname = false;
+                    break;
+                }
+            }
+            String sname="select username from users";
+            Connection con = DBConnection.getConnection();
+            PreparedStatement pstname=con.prepareStatement(sname);
+            ResultSet rsname=pstname.executeQuery();
+            while(rsname.next()){
+                if(name.equals(rsname.getString(1))){
+                    System.out.println("name is already exists please enter diffrent name");
+                    validname=false;
                     break;
                 }
             }
@@ -57,7 +73,7 @@ public class UserValidation {
                     System.out.println("You must be at least 18 years old.");
                 }
             } catch (Exception e) {
-                System.out.println("Invalid date format. Please use yyyy-MM-dd");
+                System.out.println("NOTICE : Invalid date format. Please use yyyy-MM-dd");
             }
 
         } while (!validDate);
@@ -81,7 +97,7 @@ public class UserValidation {
             }
 
             if (!validAadhar) {
-                System.out.println("Invalid Aadhar number. Please try again.");
+                System.out.println("NOTICE : Invalid Aadhar number. Please try again.");
             }
 
         } while (!validAadhar);
@@ -116,7 +132,7 @@ public class UserValidation {
             }
 
             if (!validPan) {
-                System.out.println("Invalid PAN number. Please enter again.");
+                System.out.println("NOTICE : Invalid PAN number. Please enter again.");
             }
 
         } while (!validPan);
@@ -169,3 +185,4 @@ public class UserValidation {
         return email;
     }
 }
+
